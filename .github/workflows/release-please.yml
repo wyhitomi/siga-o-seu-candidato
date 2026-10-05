@@ -13,7 +13,7 @@ jobs:
     steps:
       # A GitHub App token (instead of GITHUB_TOKEN) lets the release PR trigger CI.
       # The app needs Contents and Pull requests: read & write on this repository.
-      - uses: actions/create-github-app-token@v2
+      - uses: actions/create-github-app-token@v3
         id: app-token
         with:
           app-id: ${{ vars.APP_ID || secrets.APP_ID }}
