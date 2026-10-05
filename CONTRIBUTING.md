@@ -29,9 +29,39 @@ Commits e títulos de PR seguem [Conventional Commits](https://www.conventionalc
 | `ci` | Pipelines |
 | `chore` | Manutenção que não se encaixa acima |
 
-Escopos usados: `api`, `web`, `auth`, `connectors`, `db`, `openspec`.
+Escopos usados: `api`, `web`, `auth`, `connectors`, `db`, `openspec`, `deps`.
 Mudanças incompatíveis usam `!` (`feat(api)!: ...`) e um rodapé `BREAKING CHANGE:`.
-Esse padrão alimenta a automação de releases (release-please).
+O título do PR é validado no CI, porque ele vira o commit em `main`.
+
+## CI
+
+Todo PR roda `.github/workflows/ci.yml`: lint e testes do backend, migrations
+num Postgres real (`upgrade`, `check` e `downgrade`), lint/typecheck/build do
+frontend, verificação do contrato OpenAPI e build das imagens Docker. Só roda o
+que foi afetado pelo diff. O check obrigatório é o `ci-ok`, que agrega todos.
+
+## Releases
+
+As releases são automáticas via [release-please](https://github.com/googleapis/release-please):
+
+1. A cada merge em `main`, o release-please abre ou atualiza um PR
+   `chore: release main` com a próxima versão e o CHANGELOG de cada pacote
+   (`backend` e `frontend`), calculados a partir dos commits.
+2. Ao fazer merge desse PR, são criadas as tags (`backend-vX.Y.Z`,
+   `frontend-vX.Y.Z`) e as GitHub Releases.
+
+O workflow se autentica com um **GitHub App** (permissões *Contents* e
+*Pull requests*: read & write, instalado neste repositório), configurado em
+*Settings → Secrets and variables → Actions*:
+
+- `APP_ID`: ID do app (variável ou secret)
+- `APP_ID_KEY`: chave privada (.pem) do app (secret)
+
+Assim, o PR de release também dispara o CI, o que não acontece com o `GITHUB_TOKEN`.
+
+Antes da 1.0: `feat` e mudanças incompatíveis (`!`/`BREAKING CHANGE`) sobem a
+versão minor (0.**2**.0); `fix` e `perf` sobem a patch (0.1.**1**). `docs`,
+`test`, `ci`, `build` e `chore` não geram release sozinhos.
 
 ## Boas práticas
 
