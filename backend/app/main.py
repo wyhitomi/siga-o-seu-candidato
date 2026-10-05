@@ -18,7 +18,7 @@ def create_app() -> FastAPI:
     settings = get_settings()
     app = FastAPI(
         title="Siga o seu candidato API",
-        version="0.1.0",  # x-release-please-version
+        version="0.2.0",  # x-release-please-version
         description=API_DESCRIPTION,
         docs_url="/docs",
         redoc_url=None,
