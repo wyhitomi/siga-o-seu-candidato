@@ -38,6 +38,7 @@ class Settings(BaseSettings):
 
     # Data sources
     http_timeout_seconds: float = 30.0
+    http_retry_attempts: int = 3
     senado_base_url: str = "https://legis.senado.leg.br/dadosabertos"
     senators_stale_after_hours: int = 24
     tse_consulta_cand_url: str = (

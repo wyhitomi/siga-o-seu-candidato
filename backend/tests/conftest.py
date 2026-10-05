@@ -2,6 +2,7 @@ import os
 
 os.environ.setdefault("ENV", "test")
 os.environ.setdefault("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
+os.environ.setdefault("HTTP_RETRY_ATTEMPTS", "1")
 os.environ.setdefault("JWT_SECRET", "test-secret-with-at-least-32-bytes!!")
 
 from collections.abc import AsyncIterator  # noqa: E402
