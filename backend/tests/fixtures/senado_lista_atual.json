@@ -1,0 +1,44 @@
+{
+  "ListaParlamentarEmExercicio": {
+    "Parlamentares": {
+      "Parlamentar": [
+        {
+          "IdentificacaoParlamentar": {
+            "CodigoParlamentar": "5000",
+            "NomeParlamentar": "José Exemplo",
+            "NomeCompletoParlamentar": "José da Silva Exemplo",
+            "SexoParlamentar": "Masculino",
+            "UrlFotoParlamentar": "https://www.senado.leg.br/senadores/img/fotos-oficiais/senador5000.jpg",
+            "UrlPaginaParlamentar": "https://www25.senado.leg.br/web/senadores/senador/-/perfil/5000",
+            "EmailParlamentar": "sen.joseexemplo@senado.leg.br",
+            "SiglaPartidoParlamentar": "PXX",
+            "UfParlamentar": "SP"
+          },
+          "Mandato": {
+            "CodigoMandato": "600",
+            "UfParlamentar": "SP",
+            "PrimeiraLegislaturaDoMandato": {"NumeroLegislatura": "57", "DataInicio": "2023-02-01", "DataFim": "2027-01-31"},
+            "SegundaLegislaturaDoMandato": {"NumeroLegislatura": "58", "DataInicio": "2027-02-01", "DataFim": "2031-01-31"},
+            "DescricaoParticipacao": "Titular"
+          }
+        },
+        {
+          "IdentificacaoParlamentar": {
+            "CodigoParlamentar": "5001",
+            "NomeParlamentar": "Maria Modelo",
+            "NomeCompletoParlamentar": "Maria Aparecida Modelo",
+            "UrlFotoParlamentar": "https://www.senado.leg.br/senadores/img/fotos-oficiais/senador5001.jpg",
+            "SiglaPartidoParlamentar": "PYY",
+            "UfParlamentar": "MG"
+          },
+          "Mandato": {
+            "UfParlamentar": "MG",
+            "PrimeiraLegislaturaDoMandato": {"DataInicio": "2019-02-01", "DataFim": "2023-01-31"},
+            "SegundaLegislaturaDoMandato": {"DataInicio": "2023-02-01", "DataFim": "2027-01-31"},
+            "DescricaoParticipacao": "Suplente"
+          }
+        }
+      ]
+    }
+  }
+}
