@@ -376,10 +376,266 @@
           }
         }
       }
+    },
+    "/api/v1/auth/magic-link": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Solicitar link de acesso (somente administradores)",
+        "operationId": "request_magic_link_api_v1_auth_magic_link_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MagicLinkRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MagicLinkAccepted"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Muitas solicitações para este e-mail"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/verify": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Trocar o link de acesso por um token",
+        "operationId": "verify_api_v1_auth_verify_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessToken"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Link inválido, expirado ou já utilizado"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/me": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Administrador autenticado",
+        "operationId": "me_api_v1_auth_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminOut"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/sync/senators": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Atualizar senadores agora",
+        "operationId": "sync_senators_api_v1_admin_sync_senators_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autenticado"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/sync/state-deputies": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Carregar deputados estaduais do TSE (em segundo plano)",
+        "operationId": "sync_state_deputies_api_v1_admin_sync_state_deputies_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "uf",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z]{2}$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Uf"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncScheduled"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autenticado"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "AccessToken": {
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "title": "Access Token"
+          },
+          "token_type": {
+            "type": "string",
+            "const": "bearer",
+            "title": "Token Type",
+            "default": "bearer"
+          },
+          "expires_in": {
+            "type": "integer",
+            "title": "Expires In"
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_token",
+          "expires_in"
+        ],
+        "title": "AccessToken"
+      },
+      "AdminOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "last_login_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Login At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "email",
+          "last_login_at"
+        ],
+        "title": "AdminOut"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -392,6 +648,31 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "MagicLinkAccepted": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "title": "Detail",
+            "default": "Se o e-mail for de um administrador, você receberá um link de acesso."
+          }
+        },
+        "type": "object",
+        "title": "MagicLinkAccepted"
+      },
+      "MagicLinkRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email"
+        ],
+        "title": "MagicLinkRequest"
       },
       "ParliamentarianOut": {
         "properties": {
@@ -554,6 +835,30 @@
         ],
         "title": "ParliamentarianPage"
       },
+      "SyncResult": {
+        "properties": {
+          "stored": {
+            "type": "integer",
+            "title": "Stored"
+          }
+        },
+        "type": "object",
+        "required": [
+          "stored"
+        ],
+        "title": "SyncResult"
+      },
+      "SyncScheduled": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "title": "Detail",
+            "default": "Carga agendada. Acompanhe pelos logs."
+          }
+        },
+        "type": "object",
+        "title": "SyncScheduled"
+      },
       "ValidationError": {
         "properties": {
           "loc": {
@@ -593,6 +898,28 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "VerifyRequest": {
+        "properties": {
+          "token": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 20,
+            "title": "Token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "token"
+        ],
+        "title": "VerifyRequest"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "description": "Token obtido em /api/v1/auth/verify",
+        "scheme": "bearer"
       }
     }
   }

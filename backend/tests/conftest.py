@@ -19,7 +19,8 @@ from sqlalchemy.pool import StaticPool  # noqa: E402
 
 import app.models  # noqa: E402, F401
 from app.core.cache import get_redis  # noqa: E402
-from app.core.db import Base, get_session  # noqa: E402
+from app.core.db import Base, get_session, get_session_factory  # noqa: E402
+from app.core.email import get_mailer  # noqa: E402
 from app.main import create_app  # noqa: E402
 
 
@@ -49,8 +50,23 @@ async def redis() -> AsyncIterator[FakeAsyncRedis]:
     await client.aclose()
 
 
+class FakeMailer:
+    def __init__(self) -> None:
+        self.sent: list[tuple[str, str, str]] = []
+
+    async def send(self, to: str, subject: str, body: str) -> None:
+        self.sent.append((to, subject, body))
+
+
 @pytest.fixture
-def app(session_factory: async_sessionmaker[AsyncSession], redis: FakeAsyncRedis):  # type: ignore[no-untyped-def]
+def mailer() -> FakeMailer:
+    return FakeMailer()
+
+
+@pytest.fixture
+def app(  # type: ignore[no-untyped-def]
+    session_factory: async_sessionmaker[AsyncSession], redis: FakeAsyncRedis, mailer: FakeMailer
+):
     application = create_app()
 
     async def _session() -> AsyncIterator[AsyncSession]:
@@ -59,6 +75,8 @@ def app(session_factory: async_sessionmaker[AsyncSession], redis: FakeAsyncRedis
 
     application.dependency_overrides[get_session] = _session
     application.dependency_overrides[get_redis] = lambda: redis
+    application.dependency_overrides[get_session_factory] = lambda: session_factory
+    application.dependency_overrides[get_mailer] = lambda: mailer
     return application
 
 

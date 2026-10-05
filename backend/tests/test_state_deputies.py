@@ -14,6 +14,7 @@ from app.connectors.base import SourceUnavailableError
 from app.connectors.tse import parse_elected_state_deputies
 from app.core.config import get_settings
 from app.modules.parliamentarians import service
+from tests.conftest import FakeMailer
 
 YEAR = 2022
 TSE_URL = get_settings().tse_consulta_cand_url.format(year=YEAR)
@@ -118,3 +119,24 @@ async def test_empty_search_returns_empty_page(client: AsyncClient) -> None:
     response = await client.get("/api/v1/state-deputies")
     assert response.status_code == 200
     assert response.json() == {"items": [], "total": 0, "page": 1, "page_size": 20}
+
+
+@respx.mock
+async def test_admin_schedules_state_deputies_sync(
+    client: AsyncClient, session: AsyncSession, mailer: FakeMailer
+) -> None:
+    from tests.test_auth import _create_admin, _login
+
+    respx.get(TSE_URL).mock(return_value=httpx.Response(200, content=_zip_bytes()))
+    await _create_admin(session)
+    token = await _login(client, mailer)
+
+    response = await client.post(
+        "/api/v1/admin/sync/state-deputies",
+        params={"uf": "mg"},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 202
+    deputies = await client.get("/api/v1/state-deputies")
+    assert [i["uf"] for i in deputies.json()["items"]] == ["MG"]
