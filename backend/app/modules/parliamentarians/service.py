@@ -4,7 +4,7 @@ from datetime import timedelta
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.connectors import senado
+from app.connectors import senado, tse
 from app.connectors.base import SourceUnavailableError, build_http_client
 from app.core import cache
 from app.core.config import get_settings
@@ -71,3 +71,15 @@ async def ensure_senators_fresh(session: AsyncSession, redis: Redis) -> None:
             raise DataNotReadyError("Senado source unavailable") from None
     finally:
         await cache.release_lock(redis, lock)
+
+
+async def sync_state_deputies(session: AsyncSession, redis: Redis, uf: str | None = None) -> int:
+    year = get_settings().tse_election_year
+    async with build_http_client() as client:
+        records = await tse.fetch_elected_state_deputies(client, year, uf)
+    count = await repository.replace_snapshot(
+        session, House.ASSEMBLEIA_ESTADUAL, records, utcnow(), uf=uf
+    )
+    await cache.invalidate(redis, House.ASSEMBLEIA_ESTADUAL)
+    logger.info("Stored %d state deputies (uf=%s, year=%d)", count, uf or "all", year)
+    return count

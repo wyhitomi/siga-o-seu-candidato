@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
 from app.modules import health
-from app.modules.parliamentarians.router import senators
+from app.modules.parliamentarians.router import senators, state_deputies
 
 API_DESCRIPTION = """
 API pública e anônima para pesquisar quem governa o país, a partir de bases
@@ -29,6 +29,7 @@ def create_app() -> FastAPI:
     )
     app.include_router(health.router)
     app.include_router(senators)
+    app.include_router(state_deputies)
     return app
 
 

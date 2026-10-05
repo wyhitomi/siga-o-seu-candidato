@@ -51,3 +51,25 @@ async def get_senator(
     if row is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Senador não encontrado")
     return ParliamentarianOut.model_validate(row)
+
+
+state_deputies = APIRouter(prefix="/api/v1/state-deputies", tags=["state-deputies"])
+
+
+@state_deputies.get("", summary="Buscar deputados estaduais e distritais eleitos")
+async def search_state_deputies(
+    params: SearchParams = Depends(search_params),
+    session: AsyncSession = Depends(get_session),
+    redis: Redis = Depends(get_redis),
+) -> ParliamentarianPage:
+    return await service.search(session, redis, House.ASSEMBLEIA_ESTADUAL, params)
+
+
+@state_deputies.get("/{deputy_id}", summary="Detalhar deputado estadual", responses=NOT_FOUND)
+async def get_state_deputy(
+    deputy_id: int, session: AsyncSession = Depends(get_session)
+) -> ParliamentarianOut:
+    row = await repository.get(session, House.ASSEMBLEIA_ESTADUAL, deputy_id)
+    if row is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Deputado não encontrado")
+    return ParliamentarianOut.model_validate(row)
