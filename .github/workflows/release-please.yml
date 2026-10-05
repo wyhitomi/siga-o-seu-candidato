@@ -5,17 +5,22 @@ on:
     branches: [main]
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 jobs:
   release-please:
     runs-on: ubuntu-latest
     steps:
+      # A GitHub App token (instead of GITHUB_TOKEN) lets the release PR trigger CI.
+      # The app needs Contents and Pull requests: read & write on this repository.
+      - uses: actions/create-github-app-token@v2
+        id: app-token
+        with:
+          app-id: ${{ vars.APP_ID || secrets.APP_ID }}
+          private-key: ${{ secrets.APP_ID_KEY }}
+
       - uses: googleapis/release-please-action@v4
         with:
-          # PRs opened with GITHUB_TOKEN do not trigger other workflows (CI).
-          # Set RELEASE_PLEASE_TOKEN (fine-grained PAT or GitHub App token) to run CI on release PRs.
-          token: ${{ secrets.RELEASE_PLEASE_TOKEN || secrets.GITHUB_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json

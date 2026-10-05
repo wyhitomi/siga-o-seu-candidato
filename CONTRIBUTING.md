@@ -50,6 +50,15 @@ As releases são automáticas via [release-please](https://github.com/googleapis
 2. Ao fazer merge desse PR, são criadas as tags (`backend-vX.Y.Z`,
    `frontend-vX.Y.Z`) e as GitHub Releases.
 
+O workflow se autentica com um **GitHub App** (permissões *Contents* e
+*Pull requests*: read & write, instalado neste repositório), configurado em
+*Settings → Secrets and variables → Actions*:
+
+- `APP_ID`: ID do app (variável ou secret)
+- `APP_ID_KEY`: chave privada (.pem) do app (secret)
+
+Assim, o PR de release também dispara o CI, o que não acontece com o `GITHUB_TOKEN`.
+
 Antes da 1.0: `feat` e mudanças incompatíveis (`!`/`BREAKING CHANGE`) sobem a
 versão minor (0.**2**.0); `fix` e `perf` sobem a patch (0.1.**1**). `docs`,
 `test`, `ci`, `build` e `chore` não geram release sozinhos.
